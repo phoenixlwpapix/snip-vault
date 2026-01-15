@@ -14,17 +14,19 @@ import {
  * Protected routes: /dashboard and all sub-routes
  */
 
-const isSignInPage = createRouteMatcher(["/sign-in"]);
+const isPublicAuthPage = createRouteMatcher(["/sign-in", "/"]);
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
-    // If user is on sign-in page but already authenticated, redirect to dashboard
-    if (isSignInPage(request) && (await convexAuth.isAuthenticated())) {
+    const isAuthenticated = await convexAuth.isAuthenticated();
+
+    // If user is on public pages (sign-in or home) but already authenticated, redirect to dashboard
+    if (isPublicAuthPage(request) && isAuthenticated) {
         return nextjsMiddlewareRedirect(request, "/dashboard");
     }
 
     // If user tries to access protected route without authentication, redirect to sign-in
-    if (isProtectedRoute(request) && !(await convexAuth.isAuthenticated())) {
+    if (isProtectedRoute(request) && !isAuthenticated) {
         return nextjsMiddlewareRedirect(request, "/sign-in");
     }
 });
