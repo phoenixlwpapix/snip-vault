@@ -16,7 +16,9 @@ export default function SignInPage() {
     const router = useRouter();
 
     useEffect(() => {
+        console.log("[Sign-In] Auth State:", { isAuthenticated, isLoading });
         if (!isLoading && isAuthenticated) {
+            console.log("[Sign-In] Redirecting to /dashboard...");
             router.replace("/dashboard");
         }
     }, [isAuthenticated, isLoading, router]);
