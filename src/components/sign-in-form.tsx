@@ -6,22 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code2, Loader2, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Code2, Loader2, Sparkles, Mail, CheckCircle2 } from "lucide-react";
 
 /**
  * Sign-In Form Component
  * 
- * Handles both sign-in and sign-up flows using Convex Auth Password provider.
- * Features form validation, loading states, and error handling.
+ * Handles Magic Link authentication flow using Convex Auth with Resend.
+ * Users enter their email and receive a sign-in link - no password required!
  */
 export function SignInForm() {
     const { signIn } = useAuthActions();
-    const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [emailSent, setEmailSent] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,20 +29,67 @@ export function SignInForm() {
         try {
             const formData = new FormData();
             formData.append("email", email);
-            formData.append("password", password);
-            formData.append("flow", flow);
 
-            await signIn("password", formData);
+            // "resend" is the provider ID (lowercase version of the provider name)
+            await signIn("resend", formData);
+            setEmailSent(true);
         } catch (err) {
-            setError(
-                flow === "signIn"
-                    ? "Invalid email or password. Please try again."
-                    : "Could not create account. Email may already be registered."
-            );
+            console.error("Sign in error:", err);
+            setError("Failed to send magic link. Please try again.");
         } finally {
             setIsLoading(false);
         }
     };
+
+    // Show success message after email is sent
+    if (emailSent) {
+        return (
+            <Card className="w-full max-w-md glass animate-slide-up">
+                <CardHeader className="text-center space-y-4">
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center">
+                        <CheckCircle2 className="h-8 w-8 text-green-500" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-3xl font-bold gradient-text">
+                            Check your email
+                        </CardTitle>
+                        <CardDescription className="mt-2 text-muted-foreground">
+                            We&apos;ve sent a magic link to <strong className="text-foreground">{email}</strong>
+                        </CardDescription>
+                    </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                    <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                        <div className="flex items-start gap-3">
+                            <Mail className="h-5 w-5 text-primary mt-0.5" />
+                            <div className="text-sm text-muted-foreground">
+                                <p>Click the link in your email to sign in.</p>
+                                <p className="mt-1">The link will expire in 24 hours.</p>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+
+                <CardFooter className="flex flex-col gap-4">
+                    <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                            setEmailSent(false);
+                            setEmail("");
+                        }}
+                    >
+                        Try a different email
+                    </Button>
+
+                    <p className="text-center text-xs text-muted-foreground">
+                        Didn&apos;t receive the email? Check your spam folder or try again.
+                    </p>
+                </CardFooter>
+            </Card>
+        );
+    }
 
     return (
         <Card className="w-full max-w-md glass animate-slide-up">
@@ -54,13 +99,10 @@ export function SignInForm() {
                 </div>
                 <div>
                     <CardTitle className="text-3xl font-bold gradient-text">
-                        {flow === "signIn" ? "Welcome back" : "Create account"}
+                        Welcome to SnipVault
                     </CardTitle>
                     <CardDescription className="mt-2 text-muted-foreground">
-                        {flow === "signIn"
-                            ? "Sign in to access your snippets"
-                            : "Start organizing your code snippets today"
-                        }
+                        Enter your email to receive a magic sign-in link
                     </CardDescription>
                 </div>
             </CardHeader>
@@ -89,41 +131,13 @@ export function SignInForm() {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="password" className="text-sm font-medium">
-                            Password
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                placeholder={flow === "signUp" ? "Create a password" : "Enter your password"}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                minLength={6}
-                                autoComplete={flow === "signIn" ? "current-password" : "new-password"}
-                                className="h-11 pr-11 bg-background/50"
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-0 top-0 h-11 w-11 text-muted-foreground hover:text-foreground"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? (
-                                    <EyeOff className="h-4 w-4" />
-                                ) : (
-                                    <Eye className="h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                        {flow === "signUp" && (
+                    <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-start gap-2">
+                            <Sparkles className="h-4 w-4 text-primary mt-0.5" />
                             <p className="text-xs text-muted-foreground">
-                                Password must be at least 6 characters
+                                No password needed! We&apos;ll email you a secure sign-in link.
                             </p>
-                        )}
+                        </div>
                     </div>
                 </CardContent>
 
@@ -136,47 +150,15 @@ export function SignInForm() {
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {flow === "signIn" ? "Signing in..." : "Creating account..."}
+                                Sending magic link...
                             </>
                         ) : (
                             <>
-                                <Sparkles className="mr-2 h-4 w-4" />
-                                {flow === "signIn" ? "Sign in" : "Create account"}
+                                <Mail className="mr-2 h-4 w-4" />
+                                Send magic link
                             </>
                         )}
                     </Button>
-
-                    <div className="text-center text-sm text-muted-foreground">
-                        {flow === "signIn" ? (
-                            <>
-                                Don&apos;t have an account?{" "}
-                                <button
-                                    type="button"
-                                    className="text-primary hover:text-primary/80 font-medium transition-colors"
-                                    onClick={() => {
-                                        setFlow("signUp");
-                                        setError(null);
-                                    }}
-                                >
-                                    Sign up
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                Already have an account?{" "}
-                                <button
-                                    type="button"
-                                    className="text-primary hover:text-primary/80 font-medium transition-colors"
-                                    onClick={() => {
-                                        setFlow("signIn");
-                                        setError(null);
-                                    }}
-                                >
-                                    Sign in
-                                </button>
-                            </>
-                        )}
-                    </div>
                 </CardFooter>
             </form>
         </Card>
