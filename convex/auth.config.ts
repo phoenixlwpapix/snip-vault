@@ -2,15 +2,15 @@
  * Convex Auth Configuration
  * 
  * This file configures the authentication providers for your Convex backend.
- * Required for Convex Auth to function properly.
- * 
- * SITE_URL should be set to your production domain (e.g., https://snip.studioyyh.tech)
+ * For Convex Auth's built-in providers (like Password), the domain should be
+ * the Convex site URL (e.g., https://YOUR-PROJECT.convex.site)
  */
 export default {
     providers: [
         {
-            domain: process.env.SITE_URL,
+            domain: process.env.AUTH_DOMAIN ?? process.env.CONVEX_SITE_URL,
             applicationID: "convex",
         },
     ],
 };
+
