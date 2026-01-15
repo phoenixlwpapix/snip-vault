@@ -1,3 +1,5 @@
+"use client";
+
 import { SignInForm } from "@/components/sign-in-form";
 import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
