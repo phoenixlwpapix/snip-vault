@@ -11,8 +11,8 @@ async function getAuthenticatedUserId(ctx: { auth: { getUserIdentity: () => Prom
     if (!identity) {
         throw new Error("Not authenticated. Please sign in to continue.");
     }
-    // The subject contains the user ID in format "userId|issuer"
-    const userId = identity.subject.split("|")[0];
+    // The subject is the user ID
+    const userId = identity.subject;
     return userId as unknown as import("./_generated/dataModel").Id<"users">;
 }
 
