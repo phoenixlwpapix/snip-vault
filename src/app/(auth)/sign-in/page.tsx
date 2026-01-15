@@ -1,4 +1,7 @@
 import { SignInForm } from "@/components/sign-in-form";
+import { useConvexAuth } from "convex/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 /**
  * Sign-In Page
@@ -7,6 +10,15 @@ import { SignInForm } from "@/components/sign-in-form";
  * and centered sign-in form.
  */
 export default function SignInPage() {
+    const { isAuthenticated, isLoading } = useConvexAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            router.replace("/dashboard");
+        }
+    }, [isAuthenticated, isLoading, router]);
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Animated gradient background */}

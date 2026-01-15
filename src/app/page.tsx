@@ -1,14 +1,31 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Code2, Zap, Shield, RefreshCw, ArrowRight } from "lucide-react";
+import { useConvexAuth } from "convex/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 /**
  * Landing Page
  * 
  * Public-facing homepage showcasing SnipVault features.
  * Users are directed to sign in to access the dashboard.
+ * 
+ * ⚡ REDIRECT logic added: If user is authenticated, automatically redirect to dashboard.
  */
 export default function HomePage() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const router = useRouter();
+
+  // Redirect to dashboard if authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
