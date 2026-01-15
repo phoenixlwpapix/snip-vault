@@ -7,11 +7,7 @@
 export default {
     providers: [
         {
-            domain: "https://snip.studioyyh.tech",
-            applicationID: "convex",
-        },
-        {
-            domain: "https://snip-vault-five.vercel.app",
+            domain: process.env.CONVEX_SITE_URL,
             applicationID: "convex",
         },
     ],
