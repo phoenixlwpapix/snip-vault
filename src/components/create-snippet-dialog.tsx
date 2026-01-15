@@ -20,37 +20,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Loader2, Sparkles, Code2 } from "lucide-react";
 
 const CATEGORIES = [
-    "General",
-    "JavaScript",
-    "TypeScript",
-    "React",
-    "Next.js",
-    "CSS",
-    "HTML",
-    "Python",
-    "SQL",
-    "API",
-    "Config",
-    "Shell",
+    "General", "JavaScript", "TypeScript", "React", "Next.js", "CSS",
+    "HTML", "Python", "SQL", "API", "Config", "Shell"
 ];
 
 interface CreateSnippetDialogProps {
     children?: React.ReactNode;
 }
 
-/**
- * Create Snippet Dialog Component
- * 
- * A modal dialog for creating new code snippets.
- * Features:
- * - Title and content inputs
- * - Category selection via quick buttons
- * - Form validation
- * - Loading states
- * - Success/error toast feedback
- * 
- * ⚡ REAL-TIME: New snippets appear instantly for all connected clients!
- */
 export function CreateSnippetDialog({ children }: CreateSnippetDialogProps) {
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
@@ -62,9 +39,8 @@ export function CreateSnippetDialog({ children }: CreateSnippetDialogProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!title.trim() || !content.trim()) {
-            toast.error("Please fill in all required fields");
+            toast.error("Fields required");
             return;
         }
 
@@ -77,20 +53,13 @@ export function CreateSnippetDialog({ children }: CreateSnippetDialogProps) {
                 category,
             });
 
-            toast.success("Snippet created!", {
-                description: `"${title.trim()}" has been added to your vault`,
-                icon: <Sparkles className="h-4 w-4" />,
-            });
-
-            // Reset form and close dialog
+            toast.success("Snippet archived");
             setTitle("");
             setContent("");
             setCategory("General");
             setOpen(false);
         } catch (error) {
-            toast.error("Failed to create snippet", {
-                description: "Please try again",
-            });
+            toast.error("Failed to create");
         } finally {
             setIsSubmitting(false);
         }
@@ -100,7 +69,6 @@ export function CreateSnippetDialog({ children }: CreateSnippetDialogProps) {
         if (!isSubmitting) {
             setOpen(newOpen);
             if (!newOpen) {
-                // Reset form when closing
                 setTitle("");
                 setContent("");
                 setCategory("General");
@@ -112,107 +80,101 @@ export function CreateSnippetDialog({ children }: CreateSnippetDialogProps) {
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 {children || (
-                    <Button className="gap-2 font-semibold">
-                        <Plus className="h-4 w-4" />
-                        New Snippet
+                    <Button className="h-10 px-6 font-bold uppercase tracking-wide border-2 border-transparent hover:border-black">
+                        New Entry <Plus className="ml-2 h-4 w-4" />
                     </Button>
                 )}
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Code2 className="h-5 w-5 text-primary" />
+            <DialogContent className="sm:max-w-2xl bg-white p-0 overflow-hidden border-4 border-black">
+                <DialogHeader className="p-8 border-b-4 border-black bg-muted swiss-dots">
+                    <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-black text-white flex items-center justify-center">
+                            <Plus className="h-6 w-6" />
                         </div>
-                        <div>
-                            <DialogTitle className="text-xl">Create Snippet</DialogTitle>
-                            <DialogDescription>
-                                Add a new code snippet to your vault
+                        <div className="space-y-1">
+                            <DialogTitle className="text-3xl font-black uppercase tracking-tight">New Snippet</DialogTitle>
+                            <DialogDescription className="text-black font-medium uppercase tracking-wide text-xs">
+                                Archive new code logic
                             </DialogDescription>
                         </div>
                     </div>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-5 mt-4">
-                    {/* Title */}
-                    <div className="space-y-2">
-                        <Label htmlFor="snippet-title" className="text-sm font-medium">
-                            Title <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                            id="snippet-title"
-                            placeholder="e.g., React useEffect cleanup"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="h-11"
-                            required
-                            maxLength={100}
-                        />
-                    </div>
+                <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <Label htmlFor="snippet-title" className="uppercase font-bold text-xs tracking-wider">
+                                Title Identifier
+                            </Label>
+                            <Input
+                                id="snippet-title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="font-bold text-lg"
+                                placeholder="E.G. AUTH_HOOK"
+                                required
+                                maxLength={100}
+                                autoComplete="off"
+                            />
+                        </div>
 
-                    {/* Category */}
-                    <div className="space-y-2">
-                        <Label className="text-sm font-medium">Category</Label>
-                        <div className="flex flex-wrap gap-2">
-                            {CATEGORIES.map((cat) => (
-                                <Button
-                                    key={cat}
-                                    type="button"
-                                    variant={category === cat ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => setCategory(cat)}
-                                    className={`text-xs transition-all duration-200 ${category === cat
-                                            ? "shadow-md"
-                                            : "hover:bg-primary/5 hover:border-primary/30"
-                                        }`}
-                                >
-                                    {cat}
-                                </Button>
-                            ))}
+                        <div className="space-y-4">
+                            <Label className="uppercase font-bold text-xs tracking-wider">Category Tag</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {CATEGORIES.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        type="button"
+                                        onClick={() => setCategory(cat)}
+                                        className={`px-3 py-1 text-xs font-bold uppercase border-2 transition-all ${category === cat
+                                                ? "bg-black text-white border-black"
+                                                : "bg-white text-black border-black/20 hover:border-black"
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="space-y-2">
-                        <Label htmlFor="snippet-content" className="text-sm font-medium">
-                            Code / Content <span className="text-destructive">*</span>
+                    <div className="space-y-4">
+                        <Label htmlFor="snippet-content" className="uppercase font-bold text-xs tracking-wider">
+                            Source Code
                         </Label>
                         <Textarea
                             id="snippet-content"
-                            placeholder="Paste your code snippet here..."
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            className="min-h-[200px] font-mono text-sm resize-y"
+                            className="min-h-[300px] font-mono text-sm border-2 border-black rounded-none p-4 focus-visible:ring-0 focus-visible:border-accent resize-none bg-muted/30"
+                            placeholder="// Paste logic here..."
                             required
                         />
-                        <p className="text-xs text-muted-foreground">
-                            Tip: You can paste multi-line code directly
-                        </p>
                     </div>
 
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleOpenChange(false)}
-                            disabled={isSubmitting}
-                        >
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting} className="gap-2">
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Creating...
-                                </>
-                            ) : (
-                                <>
-                                    <Sparkles className="h-4 w-4" />
-                                    Create Snippet
-                                </>
-                            )}
-                        </Button>
+                    <DialogFooter className="pt-4 flex !justify-between border-t-2 border-black/10 mt-8">
+                        <div className="text-xs text-muted-foreground uppercase font-bold self-center">
+                            {content.length} characters
+                        </div>
+                        <div className="flex gap-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => handleOpenChange(false)}
+                                disabled={isSubmitting}
+                                className="border-black hover:bg-black hover:text-white w-32"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="bg-accent hover:bg-accent/90 text-white w-40 border-none"
+                            >
+                                {isSubmitting ? "Processing..." : "Save to Vault"}
+                            </Button>
+                        </div>
                     </DialogFooter>
                 </form>
             </DialogContent>

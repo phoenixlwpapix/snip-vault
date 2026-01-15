@@ -4,13 +4,9 @@ import { SignInForm } from "@/components/sign-in-form";
 import { useConvexAuth } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
-/**
- * Sign-In Page
- * 
- * Full-page authentication layout with gradient background
- * and centered sign-in form.
- */
 export default function SignInPage() {
     const { isAuthenticated, isLoading } = useConvexAuth();
     const router = useRouter();
@@ -22,40 +18,36 @@ export default function SignInPage() {
     }, [isAuthenticated, isLoading, router]);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-            {/* Animated gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-background swiss-dots">
 
-            {/* Floating orbs for visual interest */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-snip-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+            {/* Top Back Link */}
+            <div className="absolute top-8 left-8">
+                <Link href="/" className="flex items-center gap-2 font-bold uppercase text-xs tracking-widest hover:text-accent group">
+                    <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                    Back to Home
+                </Link>
+            </div>
 
             {/* Content */}
             <div className="relative z-10 w-full max-w-md">
-                {/* Branding */}
-                <div className="text-center mb-8">
-                    <h1 className="text-5xl font-bold gradient-text mb-2">SnipVault</h1>
-                    <p className="text-muted-foreground">
-                        Your personal code snippet sanctuary
+                <div className="text-center mb-12">
+                    <h1 className="text-6xl font-black uppercase tracking-tighter mb-2">SnipVault<span className="text-accent">.</span></h1>
+                    <div className="h-1 w-24 bg-black mx-auto mb-4"></div>
+                    <p className="font-bold uppercase tracking-widest text-xs text-muted-foreground">
+                        Secure Authentication Gateway
                     </p>
                 </div>
 
-                {/* Sign-in form */}
                 <SignInForm />
 
-                {/* Footer */}
-                <p className="text-center text-xs text-muted-foreground mt-8">
-                    Powered by{" "}
-                    <a
-                        href="https://convex.dev"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                    >
-                        Convex
-                    </a>
-                    {" "}— Real-time data, zero configuration
-                </p>
+                <div className="text-center mt-12 space-y-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        System Status: <span className="text-green-600">Active</span>
+                    </p>
+                    <p className="text-[10px] text-muted-foreground uppercase">
+                        Provided by Convex Auth 1.0
+                    </p>
+                </div>
             </div>
         </div>
     );

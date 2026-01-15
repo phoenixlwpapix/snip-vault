@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, Trash2, Calendar, Edit2 } from "lucide-react";
+import { Copy, Check, Trash2, Calendar, Edit2, Play, CornerDownRight } from "lucide-react";
 
 interface SnippetCardProps {
     id: Id<"snippets">;
@@ -21,16 +21,12 @@ interface SnippetCardProps {
 }
 
 /**
- * SnippetCard Component
+ * SnippetCard Component - Swiss International Style
  * 
- * Displays a single code snippet with:
- * - Title and category badge
- * - Code preview with syntax styling
- * - Copy to clipboard functionality with toast feedback
- * - Delete with confirmation
- * - Timestamps
- * 
- * ⚡ REAL-TIME: Deletions will instantly reflect across all connected clients
+ * Features:
+ * - Rectangular card with thick borders
+ * - Interactions: Full color inversion on hover
+ * - Typography: Bold, Uppercase labels
  */
 export function SnippetCard({
     id,
@@ -48,36 +44,21 @@ export function SnippetCard({
         try {
             await navigator.clipboard.writeText(content);
             setIsCopied(true);
-            toast.success("Copied to clipboard!", {
-                description: `"${title}" is ready to paste`,
-                duration: 2000,
-            });
-
-            // Reset copy button after 2 seconds
+            toast.success("Copied to clipboard!", { className: "rounded-none border-2 border-black" });
             setTimeout(() => setIsCopied(false), 2000);
         } catch (error) {
-            toast.error("Failed to copy", {
-                description: "Please try selecting and copying manually",
-            });
+            toast.error("Failed to copy");
         }
     };
 
     const handleDelete = async () => {
-        // Simple confirmation
-        if (!confirm(`Delete "${title}"? This cannot be undone.`)) {
-            return;
-        }
-
+        if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
         setIsDeleting(true);
         try {
             await deleteSnippet({ id });
-            toast.success("Snippet deleted", {
-                description: `"${title}" has been removed`,
-            });
+            toast.success("Snippet deleted");
         } catch (error) {
-            toast.error("Failed to delete snippet", {
-                description: "Please try again",
-            });
+            toast.error("Failed to delete snippet");
             setIsDeleting(false);
         }
     };
@@ -90,61 +71,49 @@ export function SnippetCard({
         }).format(new Date(timestamp));
     };
 
-    // Truncate content for preview (first 8 lines)
-    const previewContent = content.split("\n").slice(0, 8).join("\n");
-    const hasMoreContent = content.split("\n").length > 8;
+    const previewContent = content.split("\n").slice(0, 6).join("\n");
 
     return (
-        <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 animate-slide-up">
-            {/* Gradient overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-snip-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-            <CardHeader className="pb-3 relative">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1 min-w-0 flex-1">
-                        <h3 className="font-semibold text-lg leading-tight truncate">
+        <div className="group relative bg-card text-card-foreground border-2 border-border transition-all duration-300 hover:border-accent hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-1 flex flex-col h-full">
+            {/* Header Area */}
+            <div className="p-6 pb-2 flex justify-between items-start border-b-2 border-border/10 group-hover:border-accent/20 transition-colors duration-300">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <span className="w-3 h-3 bg-foreground transition-all duration-300 group-hover:bg-accent group-hover:rotate-90"></span>
+                        <h3 className="font-black text-xl uppercase tracking-tight leading-none text-card-foreground transition-colors duration-300 group-hover:text-accent">
                             {title}
                         </h3>
-                        {category && (
-                            <Badge
-                                variant="secondary"
-                                className="text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20"
-                            >
-                                {category}
-                            </Badge>
-                        )}
                     </div>
                 </div>
-            </CardHeader>
+                {category && (
+                    <Badge variant="outline" className="border-border text-card-foreground rounded-none text-xs font-bold uppercase transition-colors duration-300 group-hover:border-accent group-hover:text-accent">
+                        {category}
+                    </Badge>
+                )}
+            </div>
 
-            <CardContent className="pb-4 relative">
-                <div className="relative">
-                    <pre className="code-block text-xs leading-relaxed whitespace-pre-wrap break-words max-h-48 overflow-hidden">
-                        <code>{previewContent}</code>
-                    </pre>
-                    {hasMoreContent && (
-                        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-muted/80 to-transparent flex items-end justify-center pb-1">
-                            <span className="text-xs text-muted-foreground">
-                                ... more content
-                            </span>
-                        </div>
-                    )}
-                </div>
-            </CardContent>
+            {/* Content Area */}
+            <div className="p-6 pt-4 flex-grow font-mono text-xs overflow-hidden relative bg-card">
+                <pre className="opacity-100 transition-opacity duration-300 whitespace-pre-wrap break-words text-card-foreground/90">
+                    {previewContent}
+                </pre>
+                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card to-transparent"></div>
+            </div>
 
-            <CardFooter className="pt-0 flex items-center justify-between gap-2 relative">
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
+            {/* Footer / Actions */}
+            <div className="p-4 border-t-2 border-border transition-colors duration-300 group-hover:border-accent flex items-center justify-between bg-muted group-hover:bg-accent/5">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground transition-colors duration-300 group-hover:text-accent">
+                    <Calendar className="h-3.5 w-3.5" />
                     <span>{formatDate(createdAt)}</span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                     {onEdit && (
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(id)}
-                            className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                            className="h-8 w-8 p-0 rounded-none text-muted-foreground hover:bg-foreground hover:text-background group-hover:text-foreground group-hover:hover:bg-accent group-hover:hover:text-white transition-colors"
                         >
                             <Edit2 className="h-4 w-4" />
                         </Button>
@@ -155,7 +124,7 @@ export function SnippetCard({
                         size="sm"
                         onClick={handleDelete}
                         disabled={isDeleting}
-                        className="h-8 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        className="h-8 w-8 p-0 rounded-none text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive group-hover:text-destructive transition-colors"
                     >
                         <Trash2 className="h-4 w-4" />
                     </Button>
@@ -164,25 +133,20 @@ export function SnippetCard({
                         variant="default"
                         size="sm"
                         onClick={handleCopy}
-                        className={`h-8 gap-1.5 transition-all duration-200 ${isCopied
-                                ? "bg-snip-accent hover:bg-snip-accent text-white"
-                                : ""
+                        className={`h-8 px-4 rounded-none font-bold uppercase text-xs transition-all duration-300 border-2 ${isCopied
+                            ? "bg-accent text-white border-accent"
+                            : "bg-primary text-primary-foreground border-primary hover:bg-background hover:text-foreground hover:border-accent group-hover:border-accent group-hover:bg-background group-hover:text-accent group-hover:hover:bg-accent group-hover:hover:text-white"
                             }`}
                     >
                         {isCopied ? (
-                            <>
-                                <Check className="h-3.5 w-3.5" />
-                                <span className="text-xs">Copied!</span>
-                            </>
+                            <Check className="h-3.5 w-3.5 mr-1" />
                         ) : (
-                            <>
-                                <Copy className="h-3.5 w-3.5" />
-                                <span className="text-xs">Copy</span>
-                            </>
+                            <Copy className="h-3.5 w-3.5 mr-1" />
                         )}
+                        {isCopied ? "Copied" : "Copy"}
                     </Button>
                 </div>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 }

@@ -8,32 +8,20 @@ import { SnippetCard } from "@/components/snippet-card";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
     Code2,
     LogOut,
     Loader2,
-    FolderOpen,
     Sparkles,
     Zap,
     Filter,
 } from "lucide-react";
+import Link from "next/link";
 
-/**
- * Dashboard Page
- * 
- * Main application interface for managing code snippets.
- * 
- * ⚡ REAL-TIME SYNC: This page uses useQuery(api.snippets.list) which
- * automatically subscribes to changes. When a snippet is created, updated,
- * or deleted (even from another device), the UI updates INSTANTLY with
- * NO manual refresh or revalidation needed. This is the power of Convex!
- */
 export default function DashboardPage() {
     const { signOut } = useAuthActions();
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-    // ⚡ REAL-TIME QUERY: Automatically updates when data changes!
     const snippets = useQuery(api.snippets.list, {
         category: selectedCategory === "all" ? undefined : selectedCategory
     });
@@ -47,118 +35,105 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="sticky top-0 z-50 glass border-b">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Code2 className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                            <h1 className="font-bold text-xl gradient-text">SnipVault</h1>
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Zap className="h-3 w-3 text-snip-accent" />
-                                <span>Real-time sync enabled</span>
-                            </div>
+        <div className="min-h-screen bg-background text-foreground">
+            {/* Swiss Header */}
+            <header className="sticky top-0 z-50 bg-background border-b-4 border-black">
+                <div className="flex justify-between items-stretch h-16">
+                    <div className="flex items-center px-6 border-r-4 border-black bg-accent text-white">
+                        <Code2 className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 flex items-center px-6">
+                        <span className="font-black text-xl uppercase tracking-tighter">SnipVault<span className="text-accent">.</span></span>
+                        <div className="hidden md:flex items-center ml-4 gap-2 px-3 py-1 bg-muted border border-black/10">
+                            <Zap className="h-3 w-3 text-accent" />
+                            <span className="text-xs font-bold uppercase tracking-wide">System Connected</span>
                         </div>
                     </div>
-
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4 px-6 border-l-4 border-black bg-white">
                         <CreateSnippetDialog />
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={handleSignOut}
-                            className="text-muted-foreground hover:text-foreground"
+                            className="h-10 hover:bg-destructive hover:text-white rounded-none uppercase font-bold text-xs"
                         >
                             <LogOut className="h-4 w-4 mr-2" />
-                            Sign out
+                            Exit
                         </Button>
                     </div>
                 </div>
             </header>
 
-            <main className="container mx-auto px-4 py-8">
-                {/* Category Filters */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Filter className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground">
-                            Filter by category
-                        </span>
-                    </div>
+            <main className="p-8 lg:p-12">
+                {/* Controls Area */}
+                <div className="mb-12 border-4 border-black p-6 bg-muted swiss-dots">
+                    <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-black text-white">
+                                <Filter className="h-4 w-4" />
+                            </div>
+                            <span className="font-bold uppercase tracking-wide text-sm">Category Index</span>
+                        </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        <Button
-                            variant={selectedCategory === "all" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setSelectedCategory("all")}
-                            className="text-xs"
-                        >
-                            All Snippets
-                        </Button>
-
-                        {categories?.map((cat) => (
+                        <div className="flex flex-wrap gap-2">
                             <Button
-                                key={cat}
-                                variant={selectedCategory === cat ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setSelectedCategory(cat)}
-                                className="text-xs"
+                                variant={selectedCategory === "all" ? "default" : "outline"}
+                                onClick={() => setSelectedCategory("all")}
+                                className={`h-8 font-bold uppercase text-xs ${selectedCategory === "all" ? "bg-black text-white border-black" : "bg-white text-black border-2 border-black hover:bg-black hover:text-white"}`}
                             >
-                                {cat}
+                                All
                             </Button>
-                        ))}
+                            {categories?.map((cat) => (
+                                <Button
+                                    key={cat}
+                                    variant={selectedCategory === cat ? "default" : "outline"}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`h-8 font-bold uppercase text-xs ${selectedCategory === cat ? "bg-black text-white border-black" : "bg-white text-black border-2 border-black hover:bg-black hover:text-white"}`}
+                                >
+                                    {cat}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                <Separator className="mb-8" />
-
-                {/* Stats */}
+                {/* Stats Line */}
                 <div className="flex items-center gap-4 mb-8">
-                    <Badge variant="secondary" className="text-sm px-3 py-1">
-                        <FolderOpen className="h-3.5 w-3.5 mr-1.5" />
-                        {isLoading ? "..." : snippets.length} snippets
-                    </Badge>
-
+                    <div className="px-3 py-1 border-2 border-black bg-white font-mono text-xs font-bold">
+                        TOTAL_ENTRIES: {isLoading ? "..." : snippets.length}
+                    </div>
                     {selectedCategory !== "all" && (
-                        <Badge variant="outline" className="text-sm px-3 py-1">
-                            Filtered: {selectedCategory}
-                        </Badge>
+                        <div className="px-3 py-1 border-2 border-black bg-accent text-white font-mono text-xs font-bold">
+                            FILTER: {selectedCategory.toUpperCase()}
+                        </div>
                     )}
                 </div>
 
-                {/* Content */}
+                {/* Content Grid */}
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                    <div className="flex flex-col items-center justify-center h-64 border-4 border-black border-dashed opacity-50">
                         <Loader2 className="h-8 w-8 animate-spin mb-4" />
-                        <p className="text-sm">Loading your snippets...</p>
+                        <span className="font-bold uppercase tracking-widest">Retrieving Data...</span>
                     </div>
                 ) : snippets.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="h-20 w-20 rounded-2xl bg-primary/5 flex items-center justify-center mb-6">
-                            <Sparkles className="h-10 w-10 text-primary/40" />
+                    <div className="flex flex-col items-center justify-center py-32 border-4 border-black bg-white swiss-grid-pattern">
+                        <div className="w-24 h-24 bg-black text-white flex items-center justify-center mb-6">
+                            <Sparkles className="h-10 w-10" />
                         </div>
-                        <h3 className="text-xl font-semibold mb-2">
+                        <h3 className="text-3xl font-black uppercase mb-4">Vault Empty</h3>
+                        <p className="text-muted-foreground font-medium max-w-md text-center mb-8">
                             {selectedCategory === "all"
-                                ? "No snippets yet"
-                                : `No ${selectedCategory} snippets`}
-                        </h3>
-                        <p className="text-muted-foreground mb-6 max-w-md">
-                            {selectedCategory === "all"
-                                ? "Create your first snippet to start building your personal code vault."
-                                : "No snippets found in this category. Create one or select a different filter."}
+                                ? "Initialize your database by creating a new snippet."
+                                : "No entries found in this sector."}
                         </p>
                         <CreateSnippetDialog>
-                            <Button size="lg" className="gap-2 font-semibold">
-                                <Sparkles className="h-4 w-4" />
-                                Create your first snippet
+                            <Button size="lg" className="h-14 px-8 font-black uppercase text-lg border-2 border-transparent bg-accent text-white hover:bg-black">
+                                Create Entry +
                             </Button>
                         </CreateSnippetDialog>
                     </div>
                 ) : (
-                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {snippets.map((snippet) => (
                             <SnippetCard
                                 key={snippet._id}
@@ -172,14 +147,6 @@ export default function DashboardPage() {
                         ))}
                     </div>
                 )}
-
-                {/* Real-time notice */}
-                <div className="mt-12 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                    <Zap className="h-3.5 w-3.5 text-snip-accent" />
-                    <span>
-                        Changes sync in real-time across all your devices — powered by Convex
-                    </span>
-                </div>
             </main>
         </div>
     );
