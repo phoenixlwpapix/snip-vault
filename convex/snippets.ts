@@ -1,19 +1,19 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
-import { auth } from "./auth";
+import { query, mutation, QueryCtx, MutationCtx } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { Id } from "./_generated/dataModel";
 
 /**
  * Get the current user's ID from the authentication context.
+ * Uses Convex Auth's getAuthUserId which returns the actual user document ID.
  * Throws an error if the user is not authenticated.
  */
-async function getAuthenticatedUserId(ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> } }) {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+async function getAuthenticatedUserId(ctx: QueryCtx | MutationCtx): Promise<Id<"users">> {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
         throw new Error("Not authenticated. Please sign in to continue.");
     }
-    // The subject is the user ID
-    const userId = identity.subject;
-    return userId as unknown as import("./_generated/dataModel").Id<"users">;
+    return userId;
 }
 
 /**
