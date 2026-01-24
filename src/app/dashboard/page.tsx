@@ -3,11 +3,12 @@
 import { useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../../../convex/_generated/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { SnippetCard } from "@/components/snippet-card";
+import { SnippetPreviewModal } from "@/components/snippet-preview-modal";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
     Code2,
     LogOut,
@@ -16,22 +17,63 @@ import {
     Zap,
     Filter,
 } from "lucide-react";
-import Link from "next/link";
 
 export default function DashboardPage() {
     const { signOut } = useAuthActions();
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
+    const [previewSnippetId, setPreviewSnippetId] = useState<Id<"snippets"> | null>(null);
 
-    const snippets = useQuery(api.snippets.list, {
-        category: selectedCategory === "all" ? undefined : selectedCategory
-    });
+    // Fetch ALL snippets once - no category filter on server
+    const allSnippets = useQuery(api.snippets.list, {});
 
-    const categories = useQuery(api.snippets.getCategories, {});
+    // Client-side filtering - no additional database queries
+    const filteredSnippets = useMemo(() => {
+        if (!allSnippets) return undefined;
+        if (selectedCategory === "all") {
+            return allSnippets.sort((a, b) => b.createdAt - a.createdAt);
+        }
+        return allSnippets
+            .filter((s) => s.category === selectedCategory)
+            .sort((a, b) => b.createdAt - a.createdAt);
+    }, [allSnippets, selectedCategory]);
 
-    const isLoading = snippets === undefined;
+    // Extract categories from fetched snippets - no separate query needed
+    const categories = useMemo(() => {
+        if (!allSnippets) return [];
+        const cats = new Set<string>();
+        allSnippets.forEach((s) => {
+            if (s.category) cats.add(s.category);
+        });
+        return Array.from(cats).sort();
+    }, [allSnippets]);
+
+    // Get the selected snippet for preview
+    const previewSnippet = useMemo(() => {
+        if (!previewSnippetId || !allSnippets) return null;
+        const found = allSnippets.find((s) => s._id === previewSnippetId);
+        if (!found) return null;
+        return {
+            id: found._id,
+            title: found.title,
+            content: found.content,
+            category: found.category,
+            createdAt: found.createdAt,
+            updatedAt: found.updatedAt,
+        };
+    }, [previewSnippetId, allSnippets]);
+
+    const isLoading = filteredSnippets === undefined;
 
     const handleSignOut = async () => {
         await signOut();
+    };
+
+    const handleSnippetClick = (id: Id<"snippets">) => {
+        setPreviewSnippetId(id);
+    };
+
+    const handleClosePreview = () => {
+        setPreviewSnippetId(null);
     };
 
     return (
@@ -83,11 +125,11 @@ export default function DashboardPage() {
                             >
                                 All
                             </Button>
-                            {categories?.map((cat) => (
+                            {categories.map((cat) => (
                                 <Button
                                     key={cat}
                                     variant={selectedCategory === cat ? "default" : "outline"}
-                                    onClick={() => setSelectedCategory(cat)}
+                                    onClick={() => setSelectedCategory(selectedCategory === cat ? "all" : cat)}
                                     className={`h-8 font-bold uppercase text-xs ${selectedCategory === cat ? "bg-black text-white border-black" : "bg-white text-black border-2 border-black hover:bg-black hover:text-white"}`}
                                 >
                                     {cat}
@@ -100,7 +142,7 @@ export default function DashboardPage() {
                 {/* Stats Line */}
                 <div className="flex items-center gap-4 mb-8">
                     <div className="px-3 py-1 border-2 border-black bg-white font-mono text-xs font-bold">
-                        TOTAL_ENTRIES: {isLoading ? "..." : snippets.length}
+                        TOTAL_ENTRIES: {isLoading ? "..." : filteredSnippets.length}
                     </div>
                     {selectedCategory !== "all" && (
                         <div className="px-3 py-1 border-2 border-black bg-accent text-white font-mono text-xs font-bold">
@@ -115,7 +157,7 @@ export default function DashboardPage() {
                         <Loader2 className="h-8 w-8 animate-spin mb-4" />
                         <span className="font-bold uppercase tracking-widest">Retrieving Data...</span>
                     </div>
-                ) : snippets.length === 0 ? (
+                ) : filteredSnippets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-32 border-4 border-black bg-white swiss-grid-pattern">
                         <div className="w-24 h-24 bg-black text-white flex items-center justify-center mb-6">
                             <Sparkles className="h-10 w-10" />
@@ -134,7 +176,7 @@ export default function DashboardPage() {
                     </div>
                 ) : (
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {snippets.map((snippet) => (
+                        {filteredSnippets.map((snippet) => (
                             <SnippetCard
                                 key={snippet._id}
                                 id={snippet._id}
@@ -143,11 +185,19 @@ export default function DashboardPage() {
                                 category={snippet.category}
                                 createdAt={snippet.createdAt}
                                 updatedAt={snippet.updatedAt}
+                                onClick={() => handleSnippetClick(snippet._id)}
                             />
                         ))}
                     </div>
                 )}
             </main>
+
+            {/* Preview Modal */}
+            <SnippetPreviewModal
+                snippet={previewSnippet}
+                isOpen={previewSnippetId !== null}
+                onClose={handleClosePreview}
+            />
         </div>
     );
 }

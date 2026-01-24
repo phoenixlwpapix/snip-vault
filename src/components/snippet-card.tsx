@@ -18,6 +18,7 @@ interface SnippetCardProps {
     createdAt: number;
     updatedAt: number;
     onEdit?: (id: Id<"snippets">) => void;
+    onClick?: () => void;
 }
 
 /**
@@ -35,12 +36,14 @@ export function SnippetCard({
     category,
     createdAt,
     onEdit,
+    onClick,
 }: SnippetCardProps) {
     const [isCopied, setIsCopied] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const deleteSnippet = useMutation(api.snippets.remove);
 
-    const handleCopy = async () => {
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.stopPropagation();
         try {
             await navigator.clipboard.writeText(content);
             setIsCopied(true);
@@ -51,7 +54,8 @@ export function SnippetCard({
         }
     };
 
-    const handleDelete = async () => {
+    const handleDelete = async (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
         setIsDeleting(true);
         try {
@@ -74,7 +78,13 @@ export function SnippetCard({
     const previewContent = content.split("\n").slice(0, 6).join("\n");
 
     return (
-        <div className="group relative bg-card text-card-foreground border-2 border-border transition-all duration-300 hover:border-accent hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-1 flex flex-col h-full">
+        <div
+            className="group relative bg-card text-card-foreground border-2 border-border transition-all duration-300 hover:border-accent hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] hover:-translate-y-1 flex flex-col h-full cursor-pointer"
+            onClick={onClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+        >
             {/* Header Area */}
             <div className="p-6 pb-2 flex justify-between items-start border-b-2 border-border/10 group-hover:border-accent/20 transition-colors duration-300">
                 <div className="space-y-2">
@@ -112,7 +122,10 @@ export function SnippetCard({
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onEdit(id)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(id);
+                            }}
                             className="h-8 w-8 p-0 rounded-none text-muted-foreground hover:bg-foreground hover:text-background group-hover:text-foreground group-hover:hover:bg-accent group-hover:hover:text-white transition-colors"
                         >
                             <Edit2 className="h-4 w-4" />
