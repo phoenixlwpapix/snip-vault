@@ -167,7 +167,7 @@ export function SnippetPreviewModal({
                                 variant="ghost"
                                 size="sm"
                                 onClick={onClose}
-                                className="h-8 w-8 p-0 rounded-none border-2 border-transparent hover:border-black hover:bg-transparent"
+                                className="h-8 w-8 p-0 rounded-none border-2 border-transparent hover:bg-accent hover:text-white hover:border-accent"
                             >
                                 <X className="h-5 w-5" />
                             </Button>
