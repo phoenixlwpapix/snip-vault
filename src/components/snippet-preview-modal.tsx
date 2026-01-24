@@ -123,7 +123,10 @@ export function SnippetPreviewModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-4 border-black rounded-none bg-background">
+            <DialogContent
+                showCloseButton={false}
+                className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-4 border-black rounded-none bg-background"
+            >
                 {/* Header */}
                 <DialogHeader className="p-6 pb-4 border-b-4 border-black bg-muted">
                     <div className="flex items-start justify-between gap-4">
@@ -142,23 +145,33 @@ export function SnippetPreviewModal({
                                 </DialogTitle>
                             )}
                         </div>
-                        {isEditing ? (
-                            <Input
-                                value={editCategory}
-                                onChange={(e) => setEditCategory(e.target.value)}
-                                className="w-32 text-xs font-bold uppercase border-2 border-black rounded-none h-8 bg-white"
-                                placeholder="Category"
-                            />
-                        ) : (
-                            snippet.category && (
-                                <Badge
-                                    variant="outline"
-                                    className="border-2 border-black rounded-none text-xs font-bold uppercase px-3 py-1"
-                                >
-                                    {snippet.category}
-                                </Badge>
-                            )
-                        )}
+                        <div className="flex items-center gap-3">
+                            {isEditing ? (
+                                <Input
+                                    value={editCategory}
+                                    onChange={(e) => setEditCategory(e.target.value)}
+                                    className="w-32 text-xs font-bold uppercase border-2 border-black rounded-none h-8 bg-white"
+                                    placeholder="Category"
+                                />
+                            ) : (
+                                snippet.category && (
+                                    <Badge
+                                        variant="outline"
+                                        className="border-2 border-black rounded-none text-xs font-bold uppercase px-3 py-1"
+                                    >
+                                        {snippet.category}
+                                    </Badge>
+                                )
+                            )}
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onClose}
+                                className="h-8 w-8 p-0 rounded-none border-2 border-transparent hover:border-black hover:bg-transparent"
+                            >
+                                <X className="h-5 w-5" />
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Meta info */}
@@ -190,11 +203,11 @@ export function SnippetPreviewModal({
                         </div>
                     ) : (
                         <div className="relative">
-                            <div className="absolute top-0 left-0 flex items-center gap-2 px-3 py-1.5 bg-black text-white text-xs font-bold uppercase">
+                            <div className="absolute top-0 left-0 flex items-center gap-2 px-3 py-1.5 bg-black text-white text-xs font-bold uppercase z-10">
                                 <Code2 className="h-3 w-3" />
                                 Preview
                             </div>
-                            <pre className="mt-8 p-6 bg-muted border-2 border-black font-mono text-sm whitespace-pre-wrap break-words overflow-auto max-h-[400px]">
+                            <pre className="p-6 pt-12 bg-muted border-2 border-black font-mono text-sm whitespace-pre-wrap break-words overflow-auto max-h-[400px]">
                                 {snippet.content}
                             </pre>
                         </div>
@@ -236,11 +249,10 @@ export function SnippetPreviewModal({
                                 <Button
                                     variant="outline"
                                     onClick={handleCopy}
-                                    className={`h-10 px-4 rounded-none font-bold uppercase text-xs border-2 transition-all ${
-                                        isCopied
-                                            ? "bg-accent text-white border-accent"
-                                            : "border-black hover:bg-black hover:text-white"
-                                    }`}
+                                    className={`h-10 px-4 rounded-none font-bold uppercase text-xs border-2 transition-all ${isCopied
+                                        ? "bg-accent text-white border-accent"
+                                        : "border-black hover:bg-black hover:text-white"
+                                        }`}
                                 >
                                     {isCopied ? (
                                         <Check className="h-4 w-4 mr-2" />
